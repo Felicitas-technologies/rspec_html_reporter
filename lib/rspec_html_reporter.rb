@@ -118,13 +118,36 @@ class Example
     @screenshots = @metadata[:screenshots]
     @screenrecord = @metadata[:screenrecord]
     @failed_screenshot = @metadata[:failed_screenshot]
+    @descriptions = descriptions(@metadata).reverse
+  end
+
+  def descriptions(meta)
+    eg = meta[:example_group]
+    arr = [eg[:description]]
+    add_parent_description(arr, eg)
+  end
+
+  def add_parent_description(arr, eg)
+    p_eg = eg[:parent_example_group]
+    return arr unless p_eg.present?
+    arr << p_eg[:description]
+    add_parent_description(arr, p_eg)
+  end
+
+  def screen_name
+    @descriptions[0]
+  end
+
+  def function_name
+    @descriptions[1]
+  end
+
+  def condition_names
+    @descriptions.select.with_index{|d, i| i > 1}
   end
 
   def example_title
-    title_arr = @example_group.to_s.split('::') - ['RSpec', 'ExampleGroups']
-    title_arr.push @description
-
-    title_arr.join(' → ')
+    @metadata[:description]
   end
 
   def has_exception?
